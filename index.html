@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhruva's Finance Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        h2 {
+            color: var(--text);
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 5px 0 0 0;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            padding: 16px;
+            border-radius: 12px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .inc-box { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2)); border-color: rgba(16, 185, 129, 0.3); }
+        .exp-box { background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(244, 63, 94, 0.2)); border-color: rgba(244, 63, 94, 0.3); }
+        .net-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.3)); grid-column: span 2; border-color: rgba(99, 102, 241, 0.4); }
+        
+        .stat-box h3 { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-box p { margin: 8px 0 0 0; font-size: 24px; font-weight: 700; }
+        .inc-box p { color: var(--success); }
+        .exp-box p { color: var(--danger); }
+        .net-box p { color: #818cf8; }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        input, select, button {
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+        button[type="submit"] {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 5px;
+        }
+        button[type="submit"]:hover {
+            background: var(--primary-dark);
+        }
+        
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { color: var(--text-muted); font-weight: 600; background: rgba(255,255,255,0.02); }
+        td { color: var(--text); }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-paid { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .delete-btn {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>⚡ Dhruva's Finance Dashboard</h2>
+        <p>మీ ఆదాయ, వ్యయాల ట్రాకర్</p>
+    </header>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="stat-box inc-box">
+            <h3>మొత్తం సంపాదన</h3>
+            <p id="totalIncome">₹0</p>
+        </div>
+        <div class="stat-box exp-box">
+            <h3>మొత్తం ఖర్చులు</h3>
+            <p id="totalExpense">₹0</p>
+        </div>
+        <div class="stat-box net-box">
+            <h3>నికర లాభం (Net Profit)</h3>
+            <p id="netProfit">₹0</p>
+        </div>
+    </div>
+
+    <!-- Data Entry Form -->
+    <div class="card">
+        <div class="section-title">➕ కొత్త ఎంట్రీ చేర్చండి</div>
+        <form id="transactionForm" onsubmit="addTransaction(event)">
+            <select id="type" onchange="updateCategories()" required>
+                <option value="Income">సంపాదన (Income)</option>
+                <option value="Expense">ఖర్చు (Expense)</option>
+            </select>
+            
+            <select id="category" required>
+                <!-- Dynamic categories -->
+            </select>
+
+            <div id="statusContainer">
+                <select id="status">
+                    <option value="Paid">Paid (చెల్లించబడింది)</option>
+                    <option value="Pending">Pending (పెండింగ్)</option>
+                </select>
+            </div>
+
+            <input type="number" id="amount" placeholder="మొత్తం (₹)" required>
+            <input type="date" id="date" required>
+            <input type="text" id="note" placeholder="చిన్న వివరణ (ఉదా: Car Petrol, Brand Collab)">
+            
+            <button type="submit">ఎంటర్ చేయి</button>
+        </form>
+    </div>
+
+    <!-- Transactions History -->
+    <div class="card">
+        <div class="section-title">📋 రీసెంట్ రికార్డ్స్</div>
+        <div style="overflow-x: auto;">
+            <table id="transactionTable">
+                <thead>
+                    <tr>
+                        <th>తేదీ</th>
+                        <th>కేటగిరీ</th>
+                        <th>వివరణ</th>
+                        <th>అమౌంట్ / స్టేటస్</th>
+                        <th>యాక్షన్</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let transactions = JSON.parse(localStorage.getItem('dhruva_transactions')) || [];
+
+    const incomeCategories = ['YouTube', 'Affiliate', 'Instagram Brand Collab'];
+    const expenseCategories = ['Car Petrol', 'Home Rent', 'Equipment', 'Online Shopping', 'Others'];
+
+    document.getElementById('date').valueAsDate = new Date();
+
+    function updateCategories() {
+        const type = document.getElementById('type').value;
+        const categorySelect = document.getElementById('category');
+        const statusContainer = document.getElementById('statusContainer');
+        
+        categorySelect.innerHTML = '';
+        if(type === 'Income') {
+            incomeCategories.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+            statusContainer.style.display = 'block';
+        } else {
+            expenseCategories.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+            statusContainer.style.display = 'none';
+        }
+    }
+
+    updateCategories();
+
+    function addTransaction(e) {
+        e.preventDefault();
+        const type = document.getElementById('type').value;
+        const category = document.getElementById('category').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const date = document.getElementById('date').value;
+        const note = document.getElementById('note').value;
+        const status = type === 'Income' ? document.getElementById('status').value : '';
+
+        const newTx = { id: Date.now(), type, category, amount, date, note, status };
+        transactions.push(newTx);
+        
+        localStorage.setItem('dhruva_transactions', JSON.stringify(transactions));
+        document.getElementById('transactionForm').reset();
+        document.getElementById('date').valueAsDate = new Date();
+        updateCategories();
+        renderDashboard();
+    }
+
+    function deleteTransaction(id) {
+        transactions = transactions.filter(tx => tx.id !== id);
+        localStorage.setItem('dhruva_transactions', JSON.stringify(transactions));
+        renderDashboard();
+    }
+
+    function renderDashboard() {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = '';
+
+        let totalInc = 0;
+        let totalExp = 0;
+
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if(transactions.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="empty-state">ఎంట్రీలు ఏవీ లేవు. పైన ఫారమ్ ద్వారా యాడ్ చేయండి!</td></tr>`;
+        }
+
+        transactions.forEach(tx => {
+            if(tx.type === 'Income') totalInc += tx.amount;
+            else totalExp += tx.amount;
+
+            let tr = document.createElement('tr');
+            
+            let statusBadge = '';
+            if(tx.type === 'Income') {
+                statusBadge = `<br><span class="badge ${tx.status === 'Paid' ? 'badge-paid' : 'badge-pending'}">${tx.status}</span>`;
+            }
+
+            tr.innerHTML = `
+                <td>${tx.date}</td>
+                <td><b>${tx.category}</b></td>
+                <td>${tx.note || '-'}</td>
+                <td>₹${tx.amount.toLocaleString('en-IN')} ${statusBadge}</td>
+                <td><button class="delete-btn" onclick="deleteTransaction(${tx.id})">డిలీట్</button></td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        document.getElementById('totalIncome').textContent = `₹${totalInc.toLocaleString('en-IN')}`;
+        document.getElementById('totalExpense').textContent = `₹${totalExp.toLocaleString('en-IN')}`;
+        document.getElementById('netProfit').textContent = `₹${(totalInc - totalExp).toLocaleString('en-IN')}`;
+    }
+
+    renderDashboard();
+</script>
+
+</body>
+</html>
